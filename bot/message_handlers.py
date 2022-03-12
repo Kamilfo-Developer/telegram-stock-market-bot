@@ -1,7 +1,7 @@
 from telegram import KeyboardButton, ReplyKeyboardMarkup
-from bot.MSMShare import MSMShare
-from bot.UserFavouriteShares import UserFavouriteShares
-from bot.CBRates import CBRates
+from bot.msm_share import MSMShare
+from bot.userfavouriteshares import UserFavouriteShares
+from bot.cbrates import CBRates
 import logging
 import sys
 import config
@@ -161,4 +161,4 @@ def handle_sticker(update, context):
     
     logger.info(log_message)
     
-    context.bot.send_message(chat_id, 'Стикер? Ладно.')
+    context.bot.send_message(chat_id, 'Стикер? Ладно.  ')

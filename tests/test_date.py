@@ -1,5 +1,5 @@
 import unittest
-from bot.Date import Date
+from bot.date import Date
 from datetime import date as dt
 
 td = dt.today()
