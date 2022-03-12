@@ -4,15 +4,14 @@ from telegram.ext.filters import Filters
 from bot.message_handlers import handle_get_favourite, handle_clear_favourite, handle_get_rates, handle_message,  handle_start, handle_sticker
 import sys
 import logging
-import config
-import token
+import bot_token
 
 #initializing the bot 
 try:
     logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                         level=logging.INFO)
     
-    updater = Updater(token=token.TOKEN, use_context=True)
+    updater = Updater(token=bot_token.TOKEN, use_context=True)
     dispatcher = updater.dispatcher
                     
     #adding handlers
