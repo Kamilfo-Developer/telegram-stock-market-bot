@@ -161,4 +161,4 @@ def handle_sticker(update, context):
     
     logger.info(log_message)
     
-    context.bot.send_message(chat_id, 'Стикер? Ладно.  ')
+    context.bot.send_message(chat_id, 'Стикер? Ладно.')
