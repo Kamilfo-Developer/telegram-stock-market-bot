@@ -5,13 +5,14 @@ from bot.message_handlers import handle_get_favourite, handle_clear_favourite, h
 import sys
 import logging
 import config
+import token
 
 #initializing the bot 
 try:
     logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                         level=logging.INFO)
     
-    updater = Updater(token=config.TOKEN, use_context=True)
+    updater = Updater(token=token.TOKEN, use_context=True)
     dispatcher = updater.dispatcher
                     
     #adding handlers
