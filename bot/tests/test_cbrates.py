@@ -1,5 +1,5 @@
 import unittest
-from bot.cbrates import CBRates
+from bot.data_modules.cbrates import CBRates
 
 class TestCBRates(unittest.TestCase):
     def setUp(self):

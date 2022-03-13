@@ -1,6 +1,6 @@
 import unittest
 import sqlite3
-from bot.userfavouriteshares import UserFavouriteShares
+from bot.data_modules.userfavouriteshares import UserFavouriteShares
 
 DATABASE_PATH = "C:/Users/Валерий/Desktop/Projects/Telegram Market Bot/databases/test.db"
 USER_TEST_ID1 = 1

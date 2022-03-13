@@ -1,5 +1,5 @@
 import sqlite3
-import config
+import bot.config as config
 import json
 
 

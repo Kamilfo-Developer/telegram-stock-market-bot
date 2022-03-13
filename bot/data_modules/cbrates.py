@@ -1,5 +1,5 @@
 from xml.dom import minidom
-from bot.date import Date
+from bot.utils.date import Date
 import requests
 from datetime import date as dt
 

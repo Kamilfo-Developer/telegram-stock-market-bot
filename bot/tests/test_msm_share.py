@@ -1,5 +1,5 @@
 import unittest
-from bot.msm_share import MSMShare
+from bot.data_modules.msm_share import MSMShare
 
 class TestMSMShare(unittest.TestCase):
     

@@ -1,7 +1,7 @@
 .vscode/
-databases/
+db/
 
-bot_token
+bot_token.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -1,10 +1,10 @@
 from telegram import KeyboardButton, ReplyKeyboardMarkup
-from bot.msm_share import MSMShare
-from bot.userfavouriteshares import UserFavouriteShares
-from bot.cbrates import CBRates
+from bot.data_modules.msm_share import MSMShare
+from bot.data_modules.userfavouriteshares import UserFavouriteShares
+from bot.data_modules.cbrates import CBRates
 import logging
 import sys
-import config
+import bot.config as config
 
 logger = logging.getLogger()
 
