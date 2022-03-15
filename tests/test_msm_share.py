@@ -19,6 +19,4 @@ class TestMSMShare(unittest.TestCase):
         
         with self.assertRaises(ValueError): 
             self.share_data3 = MSMShare("ABCDsdf")
-        
-if __name__ == "__main__":
-    unittest.main()
+    

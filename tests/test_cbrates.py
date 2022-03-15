@@ -14,7 +14,7 @@ class TestCBRates(unittest.TestCase):
         self.assertTrue("nominal" in keys)
         self.assertTrue("names" in keys)
         
-        self.assertEqual(data["prices"]["USD"], "76,4408")
+        self.assertEqual(data["prices"]["USD"], 76.8697)
     
     def test_get_previous_exchange_rates(self):
         prev_data = self.rates.get_previous_exchange_rates().data
@@ -25,7 +25,5 @@ class TestCBRates(unittest.TestCase):
         self.assertTrue("nominal" in keys)
         self.assertTrue("names" in keys)
         
-        self.assertEqual(prev_data["prices"]["USD"], "76,8697")
+        self.assertEqual(prev_data["prices"]["USD"], 76.3347)
 
-if __name__ == "__main__":
-    unittest.main()

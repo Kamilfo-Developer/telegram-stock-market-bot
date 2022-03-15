@@ -15,19 +15,19 @@ class TestDate(unittest.TestCase):
         self.date7 = Date(1, 3, 2008)
         
     def test_get_current_day(self):
-        self.assertEqual(self.date1.get_current_day(), td.day)
-        self.assertEqual(self.date2.get_current_day(), td.day)
-        self.assertEqual(self.date3.get_current_day(), td.day)
+        self.assertEqual(Date.get_current_day(), td.day)
+        self.assertEqual(Date.get_current_day(), td.day)
+        self.assertEqual(Date.get_current_day(), td.day)
     
     def test_get_current_month(self):
-        self.assertEqual(self.date1.get_current_month(), td.month)
-        self.assertEqual(self.date2.get_current_month(), td.month)
-        self.assertEqual(self.date3.get_current_month(), td.month)
+        self.assertEqual(Date.get_current_month(), td.month)
+        self.assertEqual(Date.get_current_month(), td.month)
+        self.assertEqual(Date.get_current_month(), td.month)
     
     def test_get_current_year(self):
-        self.assertEqual(self.date1.get_current_year(), td.year)
-        self.assertEqual(self.date2.get_current_year(), td.year)
-        self.assertEqual(self.date3.get_current_year(), td.year)
+        self.assertEqual(Date.get_current_year(), td.year)
+        self.assertEqual(Date.get_current_year(), td.year)
+        self.assertEqual(Date.get_current_year(), td.year)
     
     def test_get_formated_date(self):
         self.assertEqual(self.date1.get_formated_date(separator="sep"), f'{"0" + str(td.day) if td.day < 10 else td.day}sep{"0" + str(td.month) if td.month < 10 else td.month}sep{td.year}')
@@ -55,5 +55,3 @@ class TestDate(unittest.TestCase):
         self.assertEqual(next_date4.get_formated_date(), "01-03-2005")
         self.assertEqual(next_date5.get_formated_date(), "01-03-2008")
         
-if __name__ == "__main__":
-    unittest.main()

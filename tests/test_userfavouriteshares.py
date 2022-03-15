@@ -71,5 +71,3 @@ class TestUserFavouriteShares(unittest.TestCase):
         
         self.assertListEqual(self.userFavouriteShares4.get_favourite_shares(), []) 
         
-if __name__ == "__main__":
-    unittest.main()
