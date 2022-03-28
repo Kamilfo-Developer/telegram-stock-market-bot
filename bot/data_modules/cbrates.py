@@ -1,7 +1,7 @@
 from xml.dom import minidom
 from bot.utils.date import Date
-import requests
 from datetime import date as dt
+import requests
 
 class CBRates:
     
@@ -28,12 +28,16 @@ class CBRates:
         
         items = parsed.getElementsByTagName("Valute")
 
-        result = {"prices": {}, "names": {}, "nominal": {}}
+        result = dict()
         
         for valute in items:
-            result["prices"][valute.childNodes[1].firstChild.nodeValue] = float(valute.childNodes[4].firstChild.nodeValue.replace(",", "."))
-            result["names"][valute.childNodes[1].firstChild.nodeValue] = valute.childNodes[3].firstChild.nodeValue
-            result["nominal"][valute.childNodes[1].firstChild.nodeValue] = valute.childNodes[2].firstChild.nodeValue
+            current_valute = valute.childNodes[1].firstChild.nodeValue
+            
+            result[valute.childNodes[1].firstChild.nodeValue] = {}
+            
+            result[current_valute]["price"] = float(valute.childNodes[4].firstChild.nodeValue.replace(",", "."))
+            result[current_valute]["name"] = valute.childNodes[3].firstChild.nodeValue
+            result[current_valute]["nominal"] = valute.childNodes[2].firstChild.nodeValue
         
         return result
     
@@ -50,3 +54,5 @@ class CBRates:
             prev_date = prev_date.get_previous_day_date()
     
         return previous_exchange_rates
+
+print(CBRates().data['USD']['price'])

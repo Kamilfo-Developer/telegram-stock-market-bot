@@ -5,23 +5,47 @@ class Date:
     last_days_of_months = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
     
     def __init__(self, day=dt.today().day, month=dt.today().month, year=dt.today().year):
-        self.year = year
+        self.__year = year
         
         if (month < 1 or month > 12):
             raise ValueError("Month must be in range from 1 to 12")
-        self.month = month
+        self.__month = month
         
         if (not self.__is_day_of_month_valid(day, month, year)):
             raise ValueError("No such day in this month")
-        self.day = day
+        self.__day = day
     
-    def get_current_day():
+    @property
+    def day(self):
+        return self.__day
+    
+    @day.setter
+    def day(self, value):
+        raise AttributeError("The day property is not supposed to be changed")
+
+    @property
+    def month(self):
+        return self.__month
+
+    @month.setter
+    def month(self, value):
+        raise AttributeError("The year property is not supposed to be changed")
+    
+    @property
+    def year(self):
+        return self.__year
+    
+    @year.setter
+    def year(self, value):
+        raise AttributeError("The day property is not supposed to be changed")    
+    
+    def get_current_day(self=None):
         return dt.today().day
     
-    def get_current_month():
+    def get_current_month(self=None):
         return dt.today().month
     
-    def get_current_year():
+    def get_current_year(self=None):
         return dt.today().year
     
     def __is_day_of_month_valid(self, day, month, year) -> bool:
@@ -59,9 +83,9 @@ class Date:
         Returns:
             str: formated date string
         """
-        day = self.day
-        month = self.month
-        year = self.year
+        day = self.__day
+        month = self.__month
+        year = self.__year
         if day < 10:
             day = f"0{day}"
         if month < 10:
@@ -75,9 +99,9 @@ class Date:
         Returns:
             date: a Date instance object
         """
-        day = self.day
-        month = self.month
-        year = self.year
+        day = self.__day
+        month = self.__month
+        year = self.__year
         
         day -= 1
         
@@ -102,9 +126,9 @@ class Date:
         Returns:
             date: a Date instance object
         """
-        day = self.day
-        month = self.month
-        year = self.year
+        day = self.__day
+        month = self.__month
+        year = self.__year
         
         day += 1
         

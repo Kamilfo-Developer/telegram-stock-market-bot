@@ -1,5 +1,5 @@
 from telegram import KeyboardButton, ReplyKeyboardMarkup
-from telegram.ext import Updater, CommandHandler, dispatcher, MessageHandler
+from telegram.ext import Updater, CommandHandler, MessageHandler
 from telegram.ext.filters import Filters
 from bot.data_modules.msm_share import MSMShare
 from bot.data_modules.userfavouriteshares import UserFavouriteShares
@@ -66,9 +66,10 @@ class Bot:
         message = "Стоимость избранных акций:\n"
         log_message = f"{first_name} {last_name or ''} запросил список избранного"
         favourite_shares = UserFavouriteShares(chat_id).get_favourite_shares()
-            
+        
         if not favourite_shares:
             message = "У вас пока нет избранных акций😅\nПопробуйте ввести MCX акции, например \"YNDX\"."
+        
         for mcx in favourite_shares:
             share = MSMShare(mcx)
             message += f"{mcx} ({share.get_share_name()}): <b>{share.get_share_price()}</b>₽\n"
@@ -80,7 +81,7 @@ class Bot:
             
     def handle_clear_favourite(self, update, context):
         chat_id = update.effective_chat.id
-            
+        
         UserFavouriteShares(chat_id).clear_favourite_shares()
             
         context.bot.send_message(chat_id, f"Список избранных акций был очищен.")
@@ -92,27 +93,23 @@ class Bot:
             
         try:
             CB_exchange_rates = CBRates()
-            CB_exchange_rates_previous = CB_exchange_rates.get_previous_exchange_rates()
+            previous_CB_exchange_rates = CB_exchange_rates.get_previous_exchange_rates()
             
             NEEDED_RATES = config.VALUTES
                 
             message = "🏦\nКурсы ЦБ валют к рублю:\n"
-                
-            prices = CB_exchange_rates.data["prices"]
-            previous_price = CB_exchange_rates_previous.data["prices"]
-                
-            names = CB_exchange_rates.data["names"]
-            nominal = CB_exchange_rates.data["nominal"]
-                
+            current_data = CB_exchange_rates.data
+            previous_data = previous_CB_exchange_rates.data
+            
             for key in NEEDED_RATES:
-                if prices[key] > previous_price[key]:
+                if current_data[key]['price'] > previous_data[key]['price']:
                     sign = '⏫'
-                elif prices[key] < previous_price[key]:
+                elif current_data[key]['price'] < previous_data[key]['price']:
                     sign = '⏬'
                 else:
                     sign = ''
                     
-                message += f"{nominal[key]} {names[key][0].lower() + names[key][1:]}:\n<b>{prices[key]}</b>{sign}\n"
+                message += f"{current_data[key]['nominal']} {current_data[key]['name'][0].lower() + current_data[key]['name'][1:]}:\n<b>{current_data[key]['price']}</b>{sign}\n"
                 
                 
             log_message = f"{first_name} {last_name or ''} запросил курс валют"
