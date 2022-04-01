@@ -39,7 +39,7 @@ class Bot:
     def start(self):
         self.updater.start_polling()
     
-    def handle_start(self, update, context):
+    def handle_start(self, update, context) -> None:
         chat_id = update.effective_chat.id
         first_name = update.effective_chat.first_name
         last_name = update.effective_chat.last_name or ""
