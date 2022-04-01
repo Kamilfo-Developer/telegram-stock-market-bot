@@ -2,6 +2,10 @@
 START_STICKER_PATH = "bot/stickers/StartSticker.webp"
 #The path of the database needed to store the lists of favourite shares of users
 USER_DATABASE_PATH = "bot/db/users.db"
+#Set this constant to False if you don't want to use cache
+USE_CACHE = True
+#Neded to make cache for data of Central Bank if USE_CACHE is True
+CBRATES_CACHE_DATABASE_PATH = "bot/db/cbrates_cache.db"
 #The path for tests if you want to use them for some reason
 TEST_DATABASE_PATH = "bot/db/test.db"
 #The list of valutes that will be shown to the user when /getrates entered
