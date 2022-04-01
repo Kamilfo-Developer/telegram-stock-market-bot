@@ -15,6 +15,9 @@ class Date:
             raise ValueError("No such day in this month")
         self.__day = day
     
+    def __str__(self) -> str:
+        return self.get_formated_date()
+    
     @property
     def day(self):
         return self.__day
