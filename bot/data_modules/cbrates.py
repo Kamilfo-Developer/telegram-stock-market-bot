@@ -1,8 +1,8 @@
 from xml.dom import minidom
 from bot.utils.date import Date
 import bot.config as config
+import pymongo
 import requests
-import sqlite3
 import json
 
 class CBRates:
@@ -60,19 +60,19 @@ class CBRates:
     def __get_CB_exchange_rates(self):
         date = self.__date
         
+        DB_client = pymongo.MongoClient("mongodb://localhost:27017")
+
+        DB = DB_client["cache"]
+
+        cache = DB["CB_cache"]
+
         if config.USE_CACHE:
-            
-            con = sqlite3.connect(config.CBRATES_CACHE_DATABASE_PATH)
-            
-            cur = con.cursor()
-            
-            cur.execute("CREATE TABLE IF NOT EXISTS cbcache (date TEXT, data TEXT)")
             
             formated_date = date.get_formated_date()
 
-            cache_data = list(cur.execute(f"SELECT data FROM cbcache WHERE date = '{formated_date}' "))
+            cache_data = cache.find_one({"date": formated_date})
             
-            if len(cache_data) == 0:
+            if not cache_data:
                 data = self.__require_CB_exchange_rates(date)
                 
                 day, month, year = data["date"].split("-")
@@ -81,16 +81,11 @@ class CBRates:
                 if Date(int(day), int(month), int(year)).get_formated_date() != date.get_previous_day_date().get_formated_date():
                     json_data = json.dumps(data)
                     
-                    cur.execute(f"INSERT INTO cbcache VALUES ('{formated_date}', '{json_data}')")
+                    cache.insert_one({"date": formated_date, "data": json_data})
                     
-                    con.commit()
-                    con.close()
-                
                 return data
-                
-            con.close()
             
-            return json.loads(cache_data[0][0])
+            return json.loads(cache_data["data"])
         
         return self.__require_CB_exchange_rates(date)
         
@@ -106,6 +101,3 @@ class CBRates:
             prev_date = prev_date.get_previous_day_date()
     
         return previous_exchange_rates
-
-rates = CBRates()
-    
