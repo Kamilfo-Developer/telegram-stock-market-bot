@@ -56,7 +56,7 @@ class Bot:
         
         context.bot.send_message(chat_id, message, parse_mode="html")
         
-        self.logger.info(f"Пользователь {first_name} {last_name} выбрал команду start")
+        self.logger.info(f"{first_name} {last_name} selected start command")
 
     def handle_get_favourite(self, update, context):
         chat_id = update.effective_chat.id
@@ -64,7 +64,7 @@ class Bot:
         last_name = update.effective_chat.last_name
             
         message = "Стоимость избранных акций:\n"
-        log_message = f"{first_name} {last_name or ''} запросил список избранного"
+        log_message = f"{first_name} {last_name or ''} required the favourite shares list"
         favourite_shares = UserFavouriteShares(chat_id).get_favourite_shares()
         
         if not favourite_shares:
@@ -81,8 +81,14 @@ class Bot:
             
     def handle_clear_favourite(self, update, context):
         chat_id = update.effective_chat.id
+        first_name = update.effective_chat.first_name
+        last_name = update.effective_chat.last_name
+        log_message = f"{first_name} {last_name or ''} cleard favourite list"
         
         UserFavouriteShares(chat_id).clear_favourite_shares()
+        
+        self.logger.info(log_message)
+        
             
         context.bot.send_message(chat_id, f"Список избранных акций был очищен.")
 
@@ -91,32 +97,28 @@ class Bot:
         first_name = update.effective_chat.first_name
         last_name = update.effective_chat.last_name
             
-        try:
-            CB_exchange_rates = CBRates()
-            previous_CB_exchange_rates = CB_exchange_rates.get_previous_exchange_rates()
+    
+        CB_exchange_rates = CBRates()
+        previous_CB_exchange_rates = CB_exchange_rates.get_previous_exchange_rates()
+        
+        NEEDED_RATES = config.VALUTES
             
-            NEEDED_RATES = config.VALUTES
+        message = "🏦\nКурсы ЦБ валют к рублю:\n"
+        current_data = CB_exchange_rates.data
+        previous_data = previous_CB_exchange_rates.data
+        
+        for key in NEEDED_RATES:
+            if current_data[key]['price'] > previous_data[key]['price']:
+                sign = '⏫'
+            elif current_data[key]['price'] < previous_data[key]['price']:
+                sign = '⏬'
+            else:
+                sign = ''
                 
-            message = "🏦\nКурсы ЦБ валют к рублю:\n"
-            current_data = CB_exchange_rates.data
-            previous_data = previous_CB_exchange_rates.data
+            message += f"{current_data[key]['nominal']} {current_data[key]['name'][0].lower() + current_data[key]['name'][1:]}:\n<b>{current_data[key]['price']}</b>{sign}\n"
             
-            for key in NEEDED_RATES:
-                if current_data[key]['price'] > previous_data[key]['price']:
-                    sign = '⏫'
-                elif current_data[key]['price'] < previous_data[key]['price']:
-                    sign = '⏬'
-                else:
-                    sign = ''
-                    
-                message += f"{current_data[key]['nominal']} {current_data[key]['name'][0].lower() + current_data[key]['name'][1:]}:\n<b>{current_data[key]['price']}</b>{sign}\n"
-                
-                
-            log_message = f"{first_name} {last_name or ''} запросил курс валют"
-        except ConnectionError:
-            message = "Извините, что-то пошло не так, попробуйте повторить запрос через несколько секунд."
-            log_message = f"{first_name} {last_name or ''} запросил курс валют слишком много раз"
-                
+        log_message = f"{first_name} {last_name or ''} required CB rates"
+    
         self.logger.info(log_message)
         context.bot.send_message(chat_id, message, parse_mode="html")
                 
@@ -134,11 +136,11 @@ class Bot:
             if not mcx in userFavouriteShares.get_favourite_shares():
                 userFavouriteShares.add_favourite_share(mcx)
                 message = f"Акция \"{mcx}\" была добавлена в избранное.\nВведите команду \"/getfavourite\", чтобы увидеть стоимость избранных акций."
-                log_message = f"{first_name} {last_name or ''} добавил акцию {mcx} в избранное"
+                log_message = f"{first_name} {last_name or ''} added {mcx} share to the favourite list"
             
             else:
                 message = f"Акция \"{mcx}\" уже в Вашем списке избранных акций🤷‍♂️"
-                log_message = f"{first_name} {last_name or ''} попытался добавить {mcx} в избранное, но эта акция уже была в списке"
+                log_message = f"{first_name} {last_name or ''} tried to add {mcx} to the favourite list, but the share is already there"
             
         elif "Удалить из избранного:" in text:
             mcx = f"{text[-4]}{text[-3]}{text[-2]}{text[-1]}"
@@ -147,18 +149,19 @@ class Bot:
             if mcx in userFavouriteShares.get_favourite_shares():  
                 UserFavouriteShares(chat_id).remove_from_favourite_shares(mcx)
                 message = f"Акция \"{mcx}\" была удалена из избранного.\nВведите команду \"/getfavourite\", чтобы увидеть стоимость избранных акций."
-                log_message = f"{first_name} {last_name or ''} удалил акцию {mcx} из избранного"
-            
+                log_message = f"{first_name} {last_name or ''} removed {mcx} share from the favourite list"
+
             else:
                 message = f"Акции \"{mcx}\ и так нет в Вашем списке избранных акций🤷‍♂️"
-            
+                log_message = f"{first_name} {last_name or ''} tried to remove {mcx} share from the favourite list, but it was alredy not there"
+                
         else:
             try:
                 share = MSMShare(text)
                 price = share.get_share_price()
                 share_name = share.get_share_name()
                     
-                log_message = f"{first_name} {last_name or ''} запросил акцию {text}, стоимость которой составляет {price}₽"
+                log_message = f"{first_name} {last_name or ''} required {text} share, its price is {price} RUB"
                 message = f"По данным Московской биржи, стоимость акций {share_name} составляет <b>{price}</b>₽."
                     
                 if not text.upper() in UserFavouriteShares(chat_id).get_favourite_shares():
@@ -173,7 +176,7 @@ class Bot:
             
             except ValueError:
                 message = "Упс... Похоже такой акции нет..."
-                log_message = f"{first_name} {last_name or ''} запросил несуществующую акцию. Ввод: {text}"
+                log_message = f"{first_name} {last_name or ''} required non-existent share. Entered value: {text}"
                 
         self.logger.info(log_message)
         
@@ -184,7 +187,7 @@ class Bot:
         first_name = update.effective_chat.first_name
         last_name = update.effective_chat.last_name or ""
         
-        log_message = f"{first_name} {last_name} прислал стикер"
+        log_message = f"{first_name} {last_name} sent a sticker"
         
         self.logger.info(log_message)
         
