@@ -4,7 +4,9 @@ START_STICKER_PATH = "bot/stickers/StartSticker.webp"
 USER_DATABASE_PATH = "bot/db/users.db"
 #Set this constant to False if you don't want to use cache
 USE_CACHE = True
-#The path for tests if you want to use them for some reason
+#The number represents how much time in seconds sould be passed to update cache 
+CACHE_INTERVAL = 900
+#The path for tests if you want to use them for some reasons
 TEST_DATABASE_PATH = "bot/db/test.db"
 #The list of valutes that will be shown to the user when /getrates entered
 VALUTES = ["USD", "EUR", "GBP", "JPY", "CNY"]
