@@ -1,16 +1,17 @@
+from urllib.error import HTTPError
 from xml.dom import minidom
 from bot.utils.date import Date
 import bot.config as config
 import pymongo
 import requests
 import json
+import time 
 
 class CBRates:
     
     def __init__(self, day=Date.get_current_day(), 
                  month=Date.get_current_month(), 
                  year=Date.get_current_year()) -> None:
-        
         self.__date = Date(day, month, year).get_next_day_date()
         self.__data = self.__get_CB_exchange_rates()
         
@@ -21,7 +22,7 @@ class CBRates:
     
     @date.setter
     def date(self, value):
-        raise AttributeError("date property is not allowed to be changed.")
+        raise AttributeError("\"date\" property is not allowed to be changed.")
     
     @property
     def data(self):
@@ -29,14 +30,14 @@ class CBRates:
     
     @date.setter
     def date(self, value):
-        raise AttributeError("data property is not allowed to be changed.")
+        raise AttributeError("\"data\" property is not allowed to be changed.")
 
     def __require_CB_exchange_rates(self, date: Date):
         req = requests.get(f"http://www.cbr.ru/scripts/XML_daily.asp?date_req={date.get_formated_date()}")
         #https://iss.moex.com/iss/statistics/engines/currency/markets/selt/rates.json?iss.meta=off
         
-        if (req.status_code != 200): 
-            return req.status_code
+        if (str(req.status_code)[0] == "5"): 
+            raise HTTPError(f"Server of Central Bank of Russia is not available at the moment. Status code: {req.status_code}")
         
         parsed = minidom.parseString(req.text)
         
@@ -65,26 +66,23 @@ class CBRates:
         DB = DB_client["cache"]
 
         cache = DB["CB_cache"]
-
-        if config.USE_CACHE:
-            
+        
+        if config.USE_CACHE:            
             formated_date = date.get_formated_date()
-
-            cache_data = cache.find_one({"date": formated_date})
             
-            if not cache_data:
+            cache_data = cache.find_one({"date": formated_date})
+
+            if not cache_data or time.time() - cache_data["timestamp_of_insertion"] > config.CACHE_INTERVAL:
+
                 data = self.__require_CB_exchange_rates(date)
                 
-                day, month, year = data["date"].split("-")
-
-                
-                if Date(int(day), int(month), int(year)).get_formated_date() != date.get_previous_day_date().get_formated_date():
-                    json_data = json.dumps(data)
+                json_data = json.dumps(data)
                     
-                    cache.insert_one({"date": formated_date, "data": json_data})
+                cache.delete_one({"date": formated_date})
+                cache.insert_one({"date": formated_date, "data": json_data, "timestamp_of_insertion": time.time()})
                     
                 return data
-            
+                      
             return json.loads(cache_data["data"])
         
         return self.__require_CB_exchange_rates(date)
@@ -97,7 +95,8 @@ class CBRates:
         previous_exchange_rates = CBRates(prev_date.day, prev_date.month, prev_date.year)
         
         while previous_exchange_rates.data == current_exchange_rates:
-            previous_exchange_rates = CBRates(prev_date.day, prev_date.month, prev_date.year)
             prev_date = prev_date.get_previous_day_date()
+            previous_exchange_rates = CBRates(prev_date.day, prev_date.month, prev_date.year)
+            
     
         return previous_exchange_rates
