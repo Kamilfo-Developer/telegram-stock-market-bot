@@ -2,16 +2,35 @@ from datetime import date as dt
 
 class Date:
     
-    last_days_of_months = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+    LAST_DAYS_OF_MONTHS = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
     
-    def __init__(self, day=dt.today().day, month=dt.today().month, year=dt.today().year):
+    def __init__(self, day: int | str = dt.today().day, month: int | str = dt.today().month, year: int | str = dt.today().year) -> None:
+        
+        try:
+            day = int(day)
+            
+        except ValueError:
+            raise ValueError("Incorrect day passed. Make sure it can be parsed to the integer type.")
+        
+        try:
+            month = int(month)
+        
+        except ValueError:
+            raise ValueError("Incorrect month passed. Make sure it can be parsed to the integer type.")
+        
+        try:
+            year = int(year)
+        
+        except ValueError:
+            raise ValueError("Incorrect year passed. Make sure it can be parsed to the integer type.")
+        
         self.__year = year
         
         if (month < 1 or month > 12):
             raise ValueError("Month must be in range from 1 to 12")
         self.__month = month
         
-        if (not self.__is_day_of_month_valid(day, month, year)):
+        if (not Date.is_day_of_month_valid(day, month, year)):
             raise ValueError("No such day in this month")
         self.__day = day
     
@@ -42,29 +61,29 @@ class Date:
     def year(self, value):
         raise AttributeError("The day property is not supposed to be changed")    
     
-    def get_current_day(self=None):
+    def get_current_day(self=None) -> int:
         return dt.today().day
     
-    def get_current_month(self=None):
+    def get_current_month(self=None) -> int:
         return dt.today().month
     
-    def get_current_year(self=None):
+    def get_current_year(self=None) -> int:
         return dt.today().year
     
-    def __is_day_of_month_valid(self, day, month, year) -> bool:
+    def is_day_of_month_valid(day, month, year) -> bool:
         """
         Checks if month contains day.
         
         Args:
             day (int): day to check
-            month (int): month for checking
-            year (int): year that contains "month"
+            month (int): month to check
+            year (int): year
 
         Returns:
             bool: returns True if month contains day. Else returns False. 
         """
         
-        if day < 1 or day > self.last_days_of_months[month - 1]:
+        if day < 1 or day > Date.LAST_DAYS_OF_MONTHS[month - 1]:
             #if the year is leap
             if month == 2 and year % 4 == 0:
                 if day <= 29:
@@ -86,9 +105,11 @@ class Date:
         Returns:
             str: formated date string
         """
+        
         day = self.__day
         month = self.__month
         year = self.__year
+        
         if day < 10:
             day = f"0{day}"
         if month < 10:
@@ -102,11 +123,11 @@ class Date:
         Returns:
             date: a Date instance object
         """
-        day = self.__day
+        
+        day = self.__day - 1
         month = self.__month
         year = self.__year
-        
-        day -= 1
+
         
         if day == 0:
             if month == 3 and year % 4 == 0:
@@ -119,7 +140,7 @@ class Date:
                 month = 12
             
                 
-            day = self.last_days_of_months[month - 1]
+            day = self.LAST_DAYS_OF_MONTHS[month - 1]
         
         return Date(day, month, year)
     
@@ -129,13 +150,14 @@ class Date:
         Returns:
             date: a Date instance object
         """
+        
         day = self.__day
         month = self.__month
         year = self.__year
         
         day += 1
         
-        if day > self.last_days_of_months[month - 1]:
+        if day > self.LAST_DAYS_OF_MONTHS[month - 1]:
             if year % 4 == 0 and month == 2 and day == 29:
                 return Date(29, month, year)
             elif year % 4 == 0 and month == 2 and day == 30:
