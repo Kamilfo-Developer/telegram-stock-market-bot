@@ -9,13 +9,16 @@ import time
 
 class CBRates:
     
-    def __init__(self, day=Date.get_current_day(), 
-                 month=Date.get_current_month(), 
-                 year=Date.get_current_year()) -> None:
-        self.__date = Date(day, month, year).get_next_day_date()
-        self.__data = self.__get_CB_exchange_rates()
+    def __init__(self, date=(Date.get_current_day(), 
+                 Date.get_current_month(), 
+                 Date.get_current_year())) -> None:
+        try:
+            self.__date = Date(date[0], date[1], date[2])
+        except (ValueError, IndexError):
+            raise ValueError("Incorrect date passed. Make sure it is a tuple of next format (day, month, year) and day, month and year can be parsed to the integer type.")
         
-    
+        self.__data = self.__get_CB_exchange_rates()
+            
     @property
     def date(self):
         return self.__date
@@ -92,11 +95,10 @@ class CBRates:
         current_exchange_rates = self.__data
         
         prev_date = date.get_previous_day_date()
-        previous_exchange_rates = CBRates(prev_date.day, prev_date.month, prev_date.year)
+        previous_exchange_rates = CBRates(date=(prev_date.day, prev_date.month, prev_date.year))
         
         while previous_exchange_rates.data == current_exchange_rates:
             prev_date = prev_date.get_previous_day_date()
-            previous_exchange_rates = CBRates(prev_date.day, prev_date.month, prev_date.year)
+            previous_exchange_rates = CBRates(date=(prev_date.day, prev_date.month, prev_date.year))
             
-    
         return previous_exchange_rates
