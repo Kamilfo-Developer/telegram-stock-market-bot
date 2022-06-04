@@ -5,11 +5,12 @@ from bot.data_modules.msm_share import MSMShare
 from bot.data_modules.userfavouriteshares import UserFavouriteShares
 from bot.data_modules.cbrates import CBRates
 from bot.utils.date import Date
+
 import logging
 import bot.config as config
 
 class Bot:
-    def __init__(self, token):
+    def __init__(self, token) -> None:
         logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                             level=logging.INFO)
         
@@ -17,7 +18,7 @@ class Bot:
         self.updater = Updater(token=token, use_context=True)
         self.dispatcher = self.updater.dispatcher
         
-        #Making handlers
+        #Setting handlers
         message_handler = MessageHandler(Filters.text & (~Filters.command), 
                                          self.handle_message)
         
@@ -37,10 +38,13 @@ class Bot:
         self.dispatcher.add_handler(get_favourite_handler)
         self.dispatcher.add_handler(clear_favourite)
     
-    def start(self):
+    def start(self) -> None:
         self.updater.start_polling()
     
     def handle_start(self, update, context) -> None:
+        """Handles "/start" command
+        
+        """
         chat_id = update.effective_chat.id
         first_name = update.effective_chat.first_name
         full_name = update.effective_chat.full_name
@@ -58,7 +62,10 @@ class Bot:
         
         self.logger.info(f"{full_name} selected start command")
 
-    def handle_get_favourite(self, update, context):
+    def handle_get_favourite(self, update, context) -> None:
+        """Handles "/getfavourite" command
+        
+        """
         chat_id = update.effective_chat.id
         full_name = update.effective_chat.full_name
         
@@ -78,9 +85,12 @@ class Bot:
         
         context.bot.send_message(chat_id, message, parse_mode="html")
                         
-    def handle_clear_favourite(self, update, context):
+    def handle_clear_favourite(self, update, context) -> None:
+        """Handles "/clearfavourite" command
+
+        """
         chat_id = update.effective_chat.id
-        full_name = update.effctive_chat.full_name
+        full_name = update.effective_chat.full_name
         
         log_message = f"{full_name} cleard favourite list"
         
@@ -91,7 +101,10 @@ class Bot:
             
         context.bot.send_message(chat_id, f"Список избранных акций был очищен.")
 
-    def handle_get_rates(self, update, context):
+    def handle_get_rates(self, update, context) -> None:
+        """Handles "/getrates" command
+
+        """
         chat_id = update.effective_chat.id
         full_name = update.effective_chat.full_name 
         
@@ -100,7 +113,6 @@ class Bot:
         NEEDED_RATES = config.VALUTES
                 
         if not args:
-            
             date = Date().get_next_day_date()
             
             CB_exchange_rates = CBRates((date.day, date.month, date.year))
@@ -123,33 +135,37 @@ class Bot:
                 message += f"{current_data[key]['nominal']} {current_data[key]['name'][0].lower() + current_data[key]['name'][1:]}:\n<b>{current_data[key]['price']}₽</b>{sign}\n"
                 
             log_message = f"{full_name} required CB rates"
-        
-        else:
-            try:
-                
-                date = args[0].split('.')
-                
-                rates = CBRates(date=(date[0], date[1], date[2])).data
-                
-                date = '.'.join(date)
-                
-                message = f"🏦\nКурс ЦБ валют к рублю на {date}:\n"
-                for key in NEEDED_RATES:
-                    try:
-                        message += f"{rates[key]['nominal']} {rates[key]['name'][0].lower() + rates[key]['name'][1:]}:\n<b>{rates[key]['price']}₽</b>\n"
-                    except KeyError:
-                        continue
-                    
-                log_message = f"{full_name} required CBRates with next date: {date}"
             
-            except (ValueError, IndexError):
-                message = "Похоже Вы ввели непрвильную дату с командой /getrates.\n\nКоманда должна иметь следующий вид:\n/getrates день.месяц.год.\n\nПримеры корректного ввода:\n/getrates 24.02.2022\n/getrates 20.8.2020"
-                log_message = f"{full_name} tried to require CBRates, but the date was incorrect. Input: {date}"
-                            
+            return       
+        
+        try:
+            
+            date = args[0].split('.')
+            
+            rates = CBRates(date=(date[0], date[1], date[2])).data
+            
+            date = '.'.join(date)
+            
+            message = f"🏦\nКурс ЦБ валют к рублю на {date}:\n"
+            for key in NEEDED_RATES:
+                try:
+                    message += f"{rates[key]['nominal']} {rates[key]['name'][0].lower() + rates[key]['name'][1:]}:\n<b>{rates[key]['price']}₽</b>\n"
+                except KeyError:
+                    continue
+                
+            log_message = f"{full_name} required CBRates with next date: {date}"
+        
+        except (ValueError, IndexError):
+            message = "Похоже Вы ввели непрвильную дату с командой /getrates.\n\nКоманда должна иметь следующий вид:\n/getrates день.месяц.год.\n\nПримеры корректного ввода:\n/getrates 24.02.2022\n/getrates 20.8.2020"
+            log_message = f"{full_name} tried to require CBRates, but the date was incorrect. Input: {date}"
+                        
         self.logger.info(log_message)
         context.bot.send_message(chat_id, message, parse_mode="html")
                 
-    def handle_message(self, update, context):
+    def handle_message(self, update, context) -> None:
+        """Handles any text message
+
+        """
         chat_id = update.effective_chat.id
         full_name = update.effective_chat.full_name 
         text = update.message.text
@@ -164,12 +180,16 @@ class Bot:
                 userFavouriteShares.add_favourite_share(ticker)
                 message = f"Акция \"{ticker}\" была добавлена в избранное.\nВведите команду \"/getfavourite\", чтобы увидеть стоимость избранных акций."
                 log_message = f"{full_name} added {ticker} share to the favourite list"
+
+                return 
             
-            else:
-                message = f"Акция \"{ticker}\" уже в Вашем списке избранных акций🤷‍♂️"
-                log_message = f"{full_name} tried to add {ticker} to the favourite list, but the share is already there"
+            message = f"Акция \"{ticker}\" уже в Вашем списке избранных акций🤷‍♂️"
+            log_message = f"{full_name} tried to add {ticker} to the favourite list, but the share is already there"
             
-        elif "Удалить из избранного:" in text:
+            return 
+            
+        if "Удалить из избранного:" in text:
+            #Here we connect to the DataBase and remove the share from the user's favourite list
             ticker = f"{text[-4]}{text[-3]}{text[-2]}{text[-1]}"
             userFavouriteShares = UserFavouriteShares(chat_id)
             
@@ -178,38 +198,38 @@ class Bot:
                 message = f"Акция \"{ticker}\" была удалена из избранного.\nВведите команду \"/getfavourite\", чтобы увидеть стоимость избранных акций."
                 log_message = f"{full_name} removed {ticker} share from the favourite list"
 
-            else:
-                message = f"Акции \"{ticker}\ и так нет в Вашем списке избранных акций🤷‍♂️"
-                log_message = f"{full_name} tried to remove {ticker} share from the favourite list, but it was alredy not there"
+                return 
                 
-        else:
-            try:
-                share = MSMShare(text)
-                price = share.get_share_price()
-                share_name = share.get_share_name()
-                    
-                log_message = f"{full_name} required {text} share, its price is {price} RUB"
-                message = f"По данным Московской биржи, стоимость акций {share_name} составляет <b>{price}</b>₽."
-                    
-                if not text.upper() in UserFavouriteShares(chat_id).get_favourite_shares():
-                    reply_keyboard = [    
-                        [KeyboardButton(f"Добавить в избранное: {text.upper()}")]
-                    ]
+            message = f"Акции \"{ticker}\ и так нет в Вашем списке избранных акций🤷‍♂️"
+            log_message = f"{full_name} tried to remove {ticker} share from the favourite list, but it was alredy not there"
             
-                else:
-                    reply_keyboard = [    
-                        [KeyboardButton(f"Удалить из избранного: {text.upper()}")]
-                    ]
-            
-            except ValueError:
-                message = "Упс... Похоже такой акции нет..."
-                log_message = f"{full_name} required non-existent share. Entered value: {text}"
+            return
                 
+        
+        try:
+            #Here we a Moscow Stock Market share and get its price.
+            #If the share is in the user's favourite list, we change it either "Add to favourite shares list" or "Remove from favourite shares list"
+            share = MSMShare(text)
+            price = share.get_share_price()
+            share_name = share.get_share_name()
+                
+            log_message = f"{full_name} required {text} share, its price is {price} RUB"
+            message = f"По данным Московской биржи, стоимость акций {share_name} составляет <b>{price}</b>₽."
+                
+            reply_keyboard = [[KeyboardButton(f"Добавить в избранное: {text.upper()}")]] if not text.upper() in UserFavouriteShares(chat_id).get_favourite_shares() else [[KeyboardButton(f"Удалить из избранного: {text.upper()}")]]
+        
+        except ValueError:
+            message = "Упс... Похоже такой акции нет..."
+            log_message = f"{full_name} required non-existent share. Entered value: {text}"
+            
         self.logger.info(log_message)
         
         context.bot.send_message(chat_id, message, parse_mode="html", reply_markup=ReplyKeyboardMarkup(keyboard=(reply_keyboard or ""), one_time_keyboard=True, resize_keyboard=True))
 
-    def handle_sticker(self, update, context):
+    def handle_sticker(self, update, context) -> None:
+        """Handles any sticker
+
+        """
         chat_id = update.effective_chat.id
         first_name = update.effective_chat.first_name
         last_name = update.effective_chat.last_name or ""
