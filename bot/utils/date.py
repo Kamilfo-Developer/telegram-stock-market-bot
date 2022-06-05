@@ -1,7 +1,6 @@
 from datetime import date as dt
 
 class Date:
-    
     LAST_DAYS_OF_MONTHS = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
     
     def __init__(self, day: int | str = dt.today().day, month: int | str = dt.today().month, year: int | str = dt.today().year) -> None:
@@ -169,4 +168,4 @@ class Date:
                     year += 1
                     month = 1
         
-        return Date(day, month, year)         
+        return Date(day=day, month=month, year=year)         
